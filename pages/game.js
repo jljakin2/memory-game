@@ -1,43 +1,26 @@
 import styled from "styled-components";
 import Piece from "../components/piece";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import shuffle from "../lib/shuffle";
+import { numsSmall, numsLarge, iconsSmall, iconsLarge } from "../lib/content";
 
 const BoardContainerStyles = styled.div`
   display: inline-grid;
-  grid-template-columns: repeat(4, auto);
+  grid-template-columns: repeat(6, auto);
   grid-gap: 2rem;
 `;
 
 export default function IndexPage() {
-  const boardSize = 16;
-
-  // fisher-yates shuffle helper algorithm
-  function shuffle(array) {
-    let currentIndex = array.length;
-    let randomIndex;
-
-    // While there remain elements to shuffle.
-    while (currentIndex !== 0) {
-      // Pick a remaining element.
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex--;
-
-      // And swap it with the current element.
-      [array[currentIndex], array[randomIndex]] = [
-        array[randomIndex],
-        array[currentIndex],
-      ];
-    }
-
-    return array;
-  }
+  const boardSize = 36;
 
   function createBoard(size) {
     const board = [];
-    for (let i = 1; i <= size; i += 2) {
+    for (let i = 1, j = 1; i <= size; i += 2, j++) {
+      // i = id
+      // j = contentId
       board.push({
         id: i,
-        content: i,
+        contentId: j,
         clicked: false,
         matchingPiece: i + 1,
         matchFound: false,
@@ -45,7 +28,7 @@ export default function IndexPage() {
       });
       board.push({
         id: i + 1,
-        content: i,
+        contentId: j,
         clicked: false,
         matchingPiece: i,
         matchFound: false,
@@ -58,8 +41,55 @@ export default function IndexPage() {
   }
 
   const [board, setBoard] = useState(createBoard(boardSize));
+  const [guesses, setGuesses] = useState([]);
+
+  // ================= HELPER FUNCTIONS =================
+  function updateIsClicked(id) {
+    setBoard(current =>
+      current.map(obj => {
+        if (obj.id === id) {
+          return { ...obj, clicked: !obj.clicked };
+        }
+        return obj;
+      })
+    );
+  }
+
+  function handleMatch(matchId) {
+    board.map(piece => {
+      if (piece.contentId === matchId) {
+        piece.matchFound = true;
+      }
+    });
+  }
+
+  function handleGuess(id) {
+    setGuesses([...guesses, id]);
+    // if (guesses.length === 2 && guesses[0] !== guesses[1]) {
+    //   setGuesses([]);
+    // }
+
+    // if (guesses.length === 2 && guesses[0].content !== guesses[1].content) {
+    //   setGuesses([]);
+    // }
+  }
+
+  useEffect(() => {
+    console.log(guesses);
+  }, [guesses]);
+
   const renderedPieces = board.map(item => {
-    return <Piece key={item.id} content={item.content} />;
+    return (
+      <Piece
+        key={item.id}
+        content={iconsLarge[item.contentId]}
+        contentId={item.contentId}
+        id={item.id}
+        isClicked={item.clicked}
+        handleGuess={handleGuess}
+        updateIsClicked={updateIsClicked}
+      />
+    );
   });
 
   return <BoardContainerStyles>{renderedPieces}</BoardContainerStyles>;

@@ -14,20 +14,29 @@ const PieceStyles = styled.div`
   height: 3rem;
 `;
 
-export default function Piece({ id, content }) {
-  const [pieceStatus, setPieceStatus] = useState({
-    id,
-    clicked: false,
-    matchFound: false,
-    user: null,
-  });
+export default function Piece({
+  id,
+  content,
+  handleGuess,
+  isClicked,
+  updateIsClicked,
+  contentId,
+}) {
+  // const [pieceStatus, setPieceStatus] = useState({
+  //   id,
+  //   clicked: false,
+  //   matchFound: false,
+  //   user: null,
+  // });
+
+  function handleClick(e) {
+    handleGuess(e.target.getAttribute("data-content"));
+    updateIsClicked(id);
+  }
 
   return (
-    <PieceStyles
-      onClick={() =>
-        setPieceStatus({ ...setPieceStatus, clicked: !pieceStatus.clicked })
-      }>
-      {pieceStatus.clicked ? content : ""}
+    <PieceStyles onClick={handleClick} data-content={contentId}>
+      {isClicked ? content : ""}
     </PieceStyles>
   );
 }
